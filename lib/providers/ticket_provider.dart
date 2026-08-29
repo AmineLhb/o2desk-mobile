@@ -46,7 +46,13 @@ class TicketProvider extends ChangeNotifier {
     try {
       final res = await ApiService.get('/tickets');
       if (res['success'] == true && res['data'] != null) {
-        final list = res['data']['data'] as List;
+        final rawData = res['data'];
+        List list = [];
+        if (rawData is List) {
+          list = rawData;
+        } else if (rawData is Map && rawData['data'] is List) {
+          list = rawData['data'] as List;
+        }
         _tickets = list.map((json) => TicketModel.fromJson(json)).toList();
       }
     } catch (e) {
@@ -66,6 +72,8 @@ class TicketProvider extends ChangeNotifier {
       final res = await ApiService.get('/tickets/$idOrRef');
       if (res['success'] == true && res['ticket'] != null) {
         _currentTicket = TicketModel.fromJson(res['ticket']);
+      } else if (res['success'] == true && res['data'] != null) {
+        _currentTicket = TicketModel.fromJson(res['data']);
       }
     } catch (e) {
       _errorMessage = e.toString().replaceAll('Exception: ', '');

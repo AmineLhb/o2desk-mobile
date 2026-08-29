@@ -4,11 +4,11 @@ import '../providers/auth_provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/theme_provider.dart';
 import '../theme/app_theme.dart';
-import 'dashboard_screen.dart';
+import 'dashboard/dashboard_screen.dart';
+import 'dashboard/manager_dashboard_screen.dart';
 import 'faqs/faq_screen.dart';
 import 'manager/manager_agents_screen.dart';
 import 'manager/manager_auto_assignment_screen.dart';
-import 'manager/manager_dashboard_screen.dart';
 import 'manager/manager_projects_screen.dart';
 import 'profile/profile_screen.dart';
 import 'tickets/create_ticket_screen.dart';
@@ -61,19 +61,19 @@ class _AppShellState extends State<AppShell> {
     final logoAsset = isDark ? 'assets/images/logo-inverse.png' : 'assets/images/logo_o2desk.png';
 
     final List<Widget> screens = isManager
-        ? const [
-            ManagerDashboardScreen(),
-            TicketListScreen(),
-            ManagerAgentsScreen(),
-            ManagerProjectsScreen(),
-            ManagerAutoAssignmentScreen(),
-            ProfileScreen(),
+        ? [
+            const ManagerDashboardScreen(),
+            const TicketListScreen(),
+            const ManagerAgentsScreen(),
+            const ManagerProjectsScreen(),
+            const ManagerAutoAssignmentScreen(),
+            const ProfileScreen(),
           ]
-        : const [
-            DashboardScreen(),
-            TicketListScreen(),
-            FaqScreen(),
-            ProfileScreen(),
+        : [
+            const DashboardScreen(),
+            const TicketListScreen(),
+            const FaqScreen(),
+            const ProfileScreen(),
           ];
 
     final List<BottomNavigationBarItem> items = isManager
