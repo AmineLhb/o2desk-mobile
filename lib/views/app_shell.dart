@@ -251,7 +251,7 @@ class _NotificationsSheet extends StatelessWidget {
                     : ListView.separated(
                         controller: scrollController,
                         itemCount: notifications.length,
-                        separatorBuilder: (_, __) => Divider(height: 1, color: isDark ? Colors.white12 : Colors.black06),
+                        separatorBuilder: (_, __) => Divider(height: 1, color: isDark ? Colors.white12 : Colors.black.withOpacity(0.06)),
                         itemBuilder: (_, i) {
                           final n = notifications[i];
                           return Container(
