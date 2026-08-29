@@ -1,0 +1,41 @@
+﻿name: Build Native iOS App (.ipa)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build Unsigned iOS App Payload
+        run: |
+          flutter build ios --release --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          mv Runner.app Payload/
+          zip -r O2DESK.ipa Payload
+
+      - name: Upload Native iOS App (.ipa)
+        uses: actions/upload-artifact@v3
+        with:
+          name: O2DESK-iOS-App
+          path: build/ios/iphoneos/O2DESK.ipa
