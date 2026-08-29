@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../services/api_service.dart';
 
@@ -23,11 +23,15 @@ class AppNotification {
     final data = json['data'] is Map
         ? json['data'] as Map<String, dynamic>
         : <String, dynamic>{};
+
+    final title = data['title']?.toString() ?? json['type']?.toString() ?? 'Notification';
+    final body = data['message']?.toString() ?? data['body']?.toString() ?? '';
+
     return AppNotification(
       id: json['id']?.toString() ?? '',
-      type: json['type']?.toString().split('.').last ?? 'notification',
-      title: data['title']?.toString() ?? data['message']?.toString() ?? 'Notification',
-      body: data['body']?.toString() ?? data['description']?.toString() ?? '',
+      type: json['type']?.toString() ?? 'notification',
+      title: title,
+      body: body,
       isRead: json['read_at'] != null,
       createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
     );
@@ -45,7 +49,7 @@ class NotificationProvider extends ChangeNotifier {
 
   void startPolling() {
     fetchNotifications();
-    _pollTimer = Timer.periodic(const Duration(seconds: 60), (_) {
+    _pollTimer = Timer.periodic(const Duration(seconds: 30), (_) {
       fetchNotifications();
     });
   }
