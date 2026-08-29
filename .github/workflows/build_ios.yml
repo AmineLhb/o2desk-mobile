@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-ios:
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -22,20 +22,12 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          cache: true
-
-      - name: Install CocoaPods
-        run: |
-          sudo gem install cocoapods
 
       - name: Get Dependencies
-        run: |
-          flutter pub get
-          cd ios && pod install --repo-update || true && cd ..
+        run: flutter pub get
 
       - name: Build iOS App (.app)
-        run: |
-          flutter build ios --release --no-codesign
+        run: flutter build ios --release --no-codesign
 
       - name: Package .ipa
         run: |
