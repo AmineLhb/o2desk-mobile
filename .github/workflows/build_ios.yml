@@ -10,10 +10,10 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
@@ -37,7 +37,7 @@ jobs:
           zip -r O2DESK.ipa Payload
 
       - name: Upload Native iOS App (.ipa)
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: O2DESK-iOS-App
           path: build/ios/iphoneos/O2DESK.ipa
