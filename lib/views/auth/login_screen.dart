@@ -7,6 +7,7 @@ import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
 import '../app_shell.dart';
 import 'otp_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -19,7 +20,6 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-
   bool _obscurePassword = true;
   bool _isLoading = false;
   bool _rememberMe = false;
@@ -29,24 +29,20 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    ApiService.autoProbeWorkingUrl();
     _loadSavedCredentials();
   }
 
   Future<void> _loadSavedCredentials() async {
     final prefs = await SharedPreferences.getInstance();
-    final savedEmail = prefs.getString('saved_email');
-    final savedPassword = prefs.getString('saved_password');
-    final remember = prefs.getBool('remember_me') ?? false;
-
-    if (remember && savedEmail != null && savedPassword != null) {
-      if (mounted) {
-        setState(() {
-          _emailController.text = savedEmail;
-          _passwordController.text = savedPassword;
-          _rememberMe = true;
-        });
-      }
+    final rememberMe = prefs.getBool('remember_me') ?? false;
+    if (rememberMe) {
+      final savedEmail = prefs.getString('saved_email') ?? '';
+      final savedPassword = prefs.getString('saved_password') ?? '';
+      setState(() {
+        _rememberMe = true;
+        _emailController.text = savedEmail;
+        _passwordController.text = savedPassword;
+      });
     }
   }
 
@@ -58,29 +54,29 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _submitLogin() async {
-    setState(() => _autoValidateMode = AutovalidateMode.onUserInteraction);
-    if (!_formKey.currentState!.validate()) return;
-
     setState(() {
-      _isLoading = true;
+      _autoValidateMode = AutovalidateMode.onUserInteraction;
     });
 
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() { _isLoading = true; });
+
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+
+    final prefs = await SharedPreferences.getInstance();
+    if (_rememberMe) {
+      await prefs.setString('saved_email', email);
+      await prefs.setString('saved_password', password);
+      await prefs.setBool('remember_me', true);
+    } else {
+      await prefs.remove('saved_email');
+      await prefs.remove('saved_password');
+      await prefs.setBool('remember_me', false);
+    }
+
     try {
-      final email = _emailController.text.trim();
-      final password = _passwordController.text;
-
-      // Save or clear remembered password
-      final prefs = await SharedPreferences.getInstance();
-      if (_rememberMe) {
-        await prefs.setString('saved_email', email);
-        await prefs.setString('saved_password', password);
-        await prefs.setBool('remember_me', true);
-      } else {
-        await prefs.remove('saved_email');
-        await prefs.remove('saved_password');
-        await prefs.setBool('remember_me', false);
-      }
-
       final res = await ApiService.post('/login', {
         'email': email,
         'password': password,
@@ -137,9 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
+        setState(() { _isLoading = false; });
       }
     }
   }
@@ -170,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
     final isDark = themeProvider.isDarkMode;
-
     final logoPath = isDark
         ? 'assets/images/logo-inverse.png'
         : 'assets/images/logo_o2desk.png';
@@ -185,14 +178,14 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 65), // Space above logo
+                const SizedBox(height: 65),
                 Image.asset(logoPath, height: 60, errorBuilder: (_, __, ___) => const Icon(Icons.headset_mic, size: 60, color: AppTheme.primary)),
                 const SizedBox(height: 24),
                 Text(
                   'Connexion O2DESK',
                   style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: isDark ? AppTheme.darkTextLight : AppTheme.lightTextDark),
                 ),
-                const SizedBox(height: 14), // Space under Connexion O2DESK
+                const SizedBox(height: 14),
                 const Text(
                   'Accédez à votre espace d\'assistance',
                   style: TextStyle(fontSize: 13, color: AppTheme.secondary),
@@ -227,9 +220,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
                       onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
+                        setState(() { _obscurePassword = !_obscurePassword; });
                       },
                     ),
                   ),
@@ -237,36 +228,60 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 12),
 
-                // Remember Me Checkbox
+                // Remember Me + Forgot Password Row
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: Checkbox(
-                        value: _rememberMe,
-                        activeColor: AppTheme.primary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-                        onChanged: (val) {
-                          setState(() {
-                            _rememberMe = val ?? false;
-                          });
-                        },
-                      ),
+                    // Remember Me
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: 24,
+                          width: 24,
+                          child: Checkbox(
+                            value: _rememberMe,
+                            activeColor: AppTheme.primary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                            onChanged: (val) {
+                              setState(() { _rememberMe = val ?? false; });
+                            },
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() { _rememberMe = !_rememberMe; });
+                          },
+                          child: Text(
+                            'Se souvenir de moi',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: isDark ? AppTheme.darkTextLight : AppTheme.lightTextDark,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _rememberMe = !_rememberMe;
-                        });
+
+                    // Forgot Password Link
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                        );
                       },
                       child: Text(
-                        'Se souvenir de moi',
+                        'Mot de passe oublié ?',
                         style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
-                          color: isDark ? AppTheme.darkTextLight : AppTheme.lightTextDark,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: AppTheme.primary,
                         ),
                       ),
                     ),
