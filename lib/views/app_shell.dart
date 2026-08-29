@@ -172,8 +172,36 @@ class _AppShellState extends State<AppShell> {
   }
 }
 
-class _NotificationsSheet extends StatelessWidget {
+class _NotificationsSheet extends StatefulWidget {
   const _NotificationsSheet();
+
+  @override
+  State<_NotificationsSheet> createState() => _NotificationsSheetState();
+}
+
+class _NotificationsSheetState extends State<_NotificationsSheet> {
+  bool _isMarking = false;
+  bool _justMarked = false;
+
+  Future<void> _handleMarkAllRead() async {
+    if (_isMarking) return;
+    setState(() => _isMarking = true);
+
+    final notifProvider = Provider.of<NotificationProvider>(context, listen: false);
+    await notifProvider.markAllRead();
+
+    if (mounted) {
+      setState(() {
+        _isMarking = false;
+        _justMarked = true;
+      });
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) {
+          setState(() => _justMarked = false);
+        }
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -216,10 +244,54 @@ class _NotificationsSheet extends StatelessWidget {
                 ),
                 const Spacer(),
                 if (notifications.isNotEmpty)
-                  TextButton(
-                    onPressed: () => notifProvider.markAllRead(),
-                    child: const Text('Tout lire', style: TextStyle(fontSize: 12, color: AppTheme.primary)),
-                  ),
+                  _justMarked
+                      ? AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppTheme.success.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              Icon(Icons.check_circle, size: 14, color: AppTheme.success),
+                              SizedBox(width: 4),
+                              Text(
+                                'Toutes lues',
+                                style: TextStyle(fontSize: 12, color: AppTheme.success, fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        )
+                      : InkWell(
+                          borderRadius: BorderRadius.circular(12),
+                          onTap: _isMarking ? null : _handleMarkAllRead,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (_isMarking) ...[
+                                  const SizedBox(
+                                    width: 12,
+                                    height: 12,
+                                    child: CircularProgressIndicator(strokeWidth: 2, color: AppTheme.primary),
+                                  ),
+                                  const SizedBox(width: 6),
+                                ],
+                                Text(
+                                  _isMarking ? 'Traitement...' : 'Tout lire',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: _isMarking ? AppTheme.primary.withOpacity(0.6) : AppTheme.primary,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
               ],
             ),
           ),
