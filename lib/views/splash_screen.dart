@@ -1,4 +1,4 @@
-import 'dart:math' as math;
+﻿import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
@@ -211,7 +211,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
                       style: TextStyle(
                         fontSize: 11,
                         letterSpacing: 0.3,
-                        color: isDark ? Colors.white30 : Colors.black30,
+                        color: isDark ? Colors.white30 : Colors.black.withOpacity(0.30),
                       ),
                     ),
                   ],
