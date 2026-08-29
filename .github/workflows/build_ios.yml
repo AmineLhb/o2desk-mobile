@@ -22,16 +22,26 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
-      - name: Install Dependencies
-        run: flutter pub get
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods
 
-      - name: Build Unsigned iOS App Payload
+      - name: Get Dependencies
+        run: |
+          flutter pub get
+          cd ios && pod install --repo-update || true && cd ..
+
+      - name: Build iOS App (.app)
         run: |
           flutter build ios --release --no-codesign
+
+      - name: Package .ipa
+        run: |
           cd build/ios/iphoneos
-          mkdir Payload
-          mv Runner.app Payload/
+          mkdir -p Payload
+          cp -r Runner.app Payload/
           zip -r O2DESK.ipa Payload
 
       - name: Upload Native iOS App (.ipa)
