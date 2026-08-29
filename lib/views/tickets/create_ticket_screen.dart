@@ -101,6 +101,7 @@ class _CreateTicketScreenState extends State<CreateTicketScreen> {
       final fields = {
         'titre': _titreController.text.trim(),
         'message': _messageController.text.trim(),
+        'priority_id': _selectedPriorityId.toString(),
         'ticket_priority_id': _selectedPriorityId.toString(),
         'category_id': _selectedCategoryId.toString(),
         'project_id': _selectedProjectId.toString(),
