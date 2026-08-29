@@ -1,4 +1,4 @@
-name: o2desk_mobile
+﻿name: o2desk_mobile
 description: "O2DESK Mobile Application"
 publish_to: 'none'
 version: 1.0.0+1
@@ -17,6 +17,7 @@ dependencies:
   google_fonts: ^8.2.1
   file_picker: ^12.1.1
   url_launcher: ^6.3.0
+  flutter_svg: ^2.0.10+1
   flutter_pdfview: ^1.4.5
   path_provider: ^2.1.6
 
@@ -32,3 +33,5 @@ flutter:
     - assets/images/logo_o2desk.png
     - assets/images/logo-inverse.png
     - assets/images/icon_o2desk.png
+    - assets/images/avatar_user.svg
+    - assets/images/avatar_agent.svg

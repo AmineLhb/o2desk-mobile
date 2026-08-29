@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/theme_provider.dart';
 import '../../services/api_service.dart';
@@ -432,7 +433,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
   Color _getDocumentColor(String name) {
     final ext = name.split('.').last.toLowerCase();
     if (ext == 'pdf') return const Color(0xFFEA5455);
-    if (['doc', 'docx'].contains(ext)) return const Color(0xFF7367F0);
+    if (['doc', 'docx'].contains(ext)) return const Color(0xFF187BCD);
     if (['xls', 'xlsx'].contains(ext)) return const Color(0xFF28C76F);
     return AppTheme.primary;
   }
@@ -570,10 +571,10 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
 
                       final cardBgColor = isDark
                           ? (isRight ? const Color(0xFF1E293B) : AppTheme.darkSurface)
-                          : (isRight ? const Color(0xFFF0F7FF) : Colors.white);
+                          : (isAgentMsg ? Colors.white : const Color(0xFFEDF5FF));
                       final borderColor = isDark
                           ? AppTheme.darkBorder
-                          : (isRight ? AppTheme.primary.withOpacity(0.3) : const Color(0xFFEBEBEB));
+                          : (isAgentMsg ? const Color(0xFFEBEBEB) : AppTheme.primary.withOpacity(0.25));
 
                       return Align(
                         alignment: isRight ? Alignment.centerRight : Alignment.centerLeft,
@@ -603,10 +604,14 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(
-                                    isAgentMsg ? Icons.support_agent : Icons.person,
-                                    size: 15,
-                                    color: isAgentMsg ? const Color(0xFF7367F0) : AppTheme.primary,
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(14),
+                                    child: SvgPicture.asset(
+                                      isAgentMsg ? 'assets/images/avatar_agent.svg' : 'assets/images/avatar_user.svg',
+                                      width: 20,
+                                      height: 20,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
@@ -614,7 +619,7 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12,
-                                      color: isAgentMsg ? const Color(0xFF7367F0) : AppTheme.primary,
+                                      color: isAgentMsg ? const Color(0xFF187BCD) : AppTheme.primary,
                                     ),
                                   ),
                                 ],
