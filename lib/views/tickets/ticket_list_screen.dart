@@ -222,7 +222,16 @@ class _TicketListScreenState extends State<TicketListScreen> {
                                   final status = ticket['statut'] ?? ticket['status'] ?? 'Nouveau';
 
                                   // Calculate responses count accurately
-                                  final responsesCount = ticket['responses_count'] ?? (ticket['messages'] is List ? (ticket['messages'] as List).length : 0);
+                                                                    int responsesCount = 0;
+                                  if (ticket['responses_count'] != null) {
+                                    responsesCount = (ticket['responses_count'] is int)
+                                        ? ticket['responses_count'] as int
+                                        : int.tryParse(ticket['responses_count'].toString()) ?? 0;
+                                  } else if (ticket['messages'] is List) {
+                                    responsesCount = (ticket['messages'] as List)
+                                        .where((m) => m is Map && m['agent_id'] != null)
+                                        .length;
+                                  }
 
                                   // Priority Badge Colors (Vivid High Contrast Web Style)
                                   final priorityObj = ticket['priority'];
